@@ -27,7 +27,7 @@ const sections = [
     tag: 'BATIDORA MANUAL CAT',
     title: 'BATI-DORA',
     subtitle: 'Diseño Industrial',
-    desc: 'Diseño profesional. Cada componente pensado para el máximo rendimiento.',
+    desc: 'Diseño profesional. Cada componente pensado para el máximo rendimiento',
     align: 'center',
     image: '/dosfotos.jpg',
   },
