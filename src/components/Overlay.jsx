@@ -311,7 +311,7 @@ function Section({ data, scrollProgress, transitionProgress, heroTransition, scr
           position: 'absolute',
           left: '0px',
           top: '50%',
-          width: '525px',
+          width: '555px',
           height: 'auto',
           zIndex: 99999, // Al frente de todo
           pointerEvents: 'none',
@@ -367,7 +367,7 @@ function Section({ data, scrollProgress, transitionProgress, heroTransition, scr
     right: '0px', // Ajustá esta posición para que quede en el círculo amarillo
     top: '50.2%',
     transform: 'translateY(-50%)',
-    width: '505px', // Ajustá el tamaño a tu gusto
+    width: '535px', // Ajustá el tamaño a tu gusto
     zIndex: 9999
   }}>
     <img src="/2.jpeg" alt="Batidora Render" style={{ width: '100%', height: 'auto' }} />
