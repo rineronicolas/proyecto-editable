@@ -1,0 +1,64 @@
+npmAttached Element Context from Integrated Browser
+
+Element: h2
+
+URL: http://localhost:5173/
+
+HTML Path: div#root > div > section > h2
+
+Outer HTML:
+```html
+<h2 style="font-size: clamp(3.5rem, 12vw, 9rem); font-weight: 800; line-height: 0.9; letter-spacing: -0.04em; margin: 0px; background-image: ; background-position-x: ; background-position-y: ; background-size: ; background-repeat: ; background-attachment: ; background-origin: ; background-clip: text; background-color: ; -webkit-text-fill-color: transparent;">PRECISIÓN</h2>
+```
+
+Dimensions:
+- top: 211px
+- left: 273px
+- width: 717px
+- height: 130px
+
+CSS:
+```css
+element { font-size: clamp(3.5rem, 12vw, 9rem); font-weight: 800; line-height: 0.9; letter-spacing: -0.04em; margin: 0px; background-image: ; background-position-x: ; background-position-y: ; background-size: ; background-repeat: ; background-attachment: ; background-origin: ; background-clip: text; background-color: ; -webkit-text-fill-color: transparent; }
+*, *::before, *::after { box-sizing: border-box;
+  margin: 0;
+  padding: 0; }
+
+/* Pseudo-elements */
+::selection { background: var(--accent);
+  color: #000; }
+::-webkit-scrollbar { width: 3px; }
+::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 2px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+
+/* Inherited */
+body { color: var(--text); font-family: 'Outfit', sans-serif }
+html { font-size: 16px }
+
+/* Resolved values */
+margin: 0px;
+padding: 0px;
+border-radius: 0px;
+-webkit-text-fill-color: rgba(0, 0, 0, 0);
+background-clip: text;
+box-sizing: border-box;
+color: rgb(240, 237, 232);
+display: block;
+font-family: Outfit, sans-serif;
+font-size: 144px;
+font-weight: 800;
+height: 129.594px;
+letter-spacing: -5.76px;
+line-height: 129.6px;
+margin-block-end: 0px /*UA*/;
+margin-block-start: 0px /*UA*/;
+margin-inline-end: 0px /*UA*/;
+margin-inline-start: 0px /*UA*/;
+unicode-bidi: isolate /*UA*/;
+width: 717.266px;
+
+/* CSS variables */
+--accent: #c8f542;
+--bg: #060609;
+--text: #f0ede8;
+```

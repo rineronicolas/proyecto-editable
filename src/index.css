@@ -1,0 +1,333 @@
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --bg: #060609;
+  --accent: #ffcd00;
+  --caterpillar: #ffcd00;
+  --accent2: #ff3d6e;
+  --text: #f0ede8;
+  --muted: #666;
+}
+
+html {
+  font-size: 16px;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Outfit', sans-serif;
+  overflow-x: hidden;
+  scroll-behavior: smooth;
+}
+
+.nav-links {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.nav-logo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+}
+
+.nav-logo img {
+  display: block;
+  width: auto;
+  height: 100px;
+  max-width: 240px;
+  max-height: 200px;
+  object-fit: contain;
+}
+
+.nav-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem 1.4rem;
+  border: 1px solid rgba(255, 205, 0, 0.35);
+  border-radius: 999px;
+  background: linear-gradient(180deg, rgba(8, 8, 8, 0.98), rgba(25, 25, 25, 0.98));
+  color: #ffffff;
+  text-transform: uppercase;
+  font-size: 0.95rem;
+  letter-spacing: 0.18em;
+  font-weight: 700;
+  text-decoration: none;
+  transition: transform 0.2s ease, color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+  position: relative;
+}
+
+.nav-button::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 999px;
+  box-shadow: 0 0 0 1px rgba(255, 205, 0, 0.2);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.nav-button:hover {
+  color: #ffffff;
+  border-color: var(--accent);
+  transform: translateY(-1px);
+  box-shadow: 0 10px 35px rgba(0, 0, 0, 0.18);
+}
+
+.nav-button-active {
+  color: #ffffff;
+  border-color: var(--accent);
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.22);
+}
+
+.nav-button:hover::before {
+  opacity: 1;
+}
+
+.nav-button:active {
+  transform: translateY(0);
+}
+
+::-webkit-scrollbar { width: 3px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 2px; }
+
+::selection {
+  background: var(--accent);
+  color: #000;
+}
+
+@keyframes smokeMove {
+  0% { transform: translateY(0) scale(1); filter: blur(0px) contrast(1); }
+  50% { transform: translateY(-6%) scale(1.02); filter: blur(0.6px) contrast(1.05); }
+  100% { transform: translateY(0) scale(1); filter: blur(0px) contrast(1); }
+}
+
+@keyframes specPulse {
+  0% { transform: scale(1); box-shadow: 0 0 0 rgba(255,205,0,0); }
+  50% { transform: scale(1.04); box-shadow: 0 0 32px rgba(255,205,0,0.35); }
+  100% { transform: scale(1); box-shadow: 0 0 0 rgba(255,205,0,0); }
+}
+
+.spec-cta-button.pulse {
+  animation: specPulse 0.65s ease-out;
+}
+
+.cursor-smoke {
+  position: fixed;
+  width: 240px;
+  height: 240px;
+  border-radius: 50%;
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+  opacity: 0;
+  transition: opacity 0.25s ease, transform 0.18s ease;
+  background: radial-gradient(circle at 50% 50%, rgba(255,205,0,0.22) 0%, rgba(255,205,0,0.12) 28%, rgba(255,205,0,0.06) 42%, rgba(0,0,0,0) 70%);
+  filter: blur(16px) saturate(1.2);
+  mix-blend-mode: screen;
+  z-index: 20;
+}
+
+.cursor-smoke.active {
+  opacity: 1;
+}
+
+.cursor-smoke::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: radial-gradient(circle at 40% 40%, rgba(255,255,255,0.18) 0%, rgba(255,205,0,0.08) 25%, transparent 65%);
+}
+
+/* Utility: smoke background will be placed at /public/smoke.gif */
+.smoke-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+  mix-blend-mode: screen;
+}
+/* =======================================================
+   PARCHES INDESTRUCTIBLES PARA LA ENTREGA FINAL
+   ======================================================= */
+
+/* 1. CURSOR Y BOTONES FANTASMAS: Forzamos a que el nav muera al bajar */
+nav {
+  position: absolute !important;
+  top: 0 !important;
+  pointer-events: auto !important;
+}
+
+/* Si el scroll baja, el nav desaparece físicamente de la pantalla y no bloquea nada */
+body:not(:has(section:first-of-type)) nav, 
+main ~ nav,
+.section-container:not(:first-child) nav {
+  display: none !important;
+  pointer-events: none !important;
+}
+
+/* 2. EL BOTÓN FLOTANTE: Creado y renderizado 100% por CSS puro */
+body::after {
+  content: "↑" !important;
+  position: fixed !important;
+  bottom: 30px !important;
+  right: 30px !important;
+  width: 55px !important;
+  height: 55px !important;
+  background-color: #ffcc00 !important; /* Amarillo CAT */
+  color: #000000 !important;
+  border: 3px solid #000000 !important;
+  border-radius: 50% !important;
+  font-size: 26px !important;
+  font-weight: bold !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+  box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.5) !important;
+  z-index: 999999999 !important; /* Por encima de cualquier Canvas 3D */
+  transition: transform 0.2s ease !important;
+  pointer-events: auto !important;
+  
+}
+
+body:hover::after {
+  transform: scale(1.05) !important;
+}
+
+/* ==========================================================================
+   EFECTO CORTINA DIRECCIONAL INTELIGENTE (ESTILO LANDO NORRIS)
+   ========================================================================== */
+
+.btn-racing-directional {
+  position: relative !important;
+  overflow: hidden !important;
+  z-index: 1 !important;
+  transition: color 0.25s ease !important;
+}
+
+.btn-racing-directional::before {
+  content: '' !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  background-color: var(--accent) !important;
+  z-index: -1 !important;
+  border-radius: inherit !important; /* Mantiene la forma de cápsula original */
+  
+  /* 💡 Usamos clip-path para el efecto cortina real */
+  clip-path: var(--racing-clip, inset(0 0 100% 0)) !important; 
+  transition: clip-path 0.55s cubic-bezier(0.25, 1, 0.5, 1) !important;
+}
+
+/* Cuando se activa el hover, la cortina pasa a cubrir el 100% */
+.btn-racing-directional.hovered::before {
+  clip-path: inset(0 0 0 0) !important;
+}
+
+
+.btn-racing-directional.hovered {
+  color: #000000 !important;
+}
+
+.btn-racing-directional.hovered * {
+  color: #000000 !important;
+}
+.btn-racing-dark::before {
+  background-color: #000000 !important;
+  clip-path: var(--racing-clip, inset(0 0 100% 0)) !important;
+}
+
+.btn-racing-directional.btn-racing-dark.hovered {
+  color: #ffffff !important;
+  border-color: #000000 !important;
+}
+
+/* Esto fuerza a que el div que contiene al hero ocupe todo */
+.hero-image-bg {
+  min-height: 100vh !important;
+  width: 100% !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+  align-items: center !important;
+  background-size: cover !important;
+  background-position: center !important;
+  background-attachment: fixed !important;
+  position: relative !important;
+}
+
+/* Oscurecemos un poco la imagen para que el texto blanco se lea */
+.hero-image-bg::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 0;
+}
+
+/* Limpieza absoluta del Hero */
+.hero-image-bg {
+  min-height: 100vh !important;
+  width: 100% !important;
+  background-image: url('/dosfotos.jpg') !important; 
+  background-size: cover !important;
+  background-position: center !important;
+  background-attachment: fixed !important;
+  background-color: transparent !important;
+}
+
+/* Solo texto blanco DENTRO del hero, ignorando el amarillo */
+.hero-image-bg h2, 
+.hero-image-bg p, 
+.hero-image-bg span:not(.tag-amarillo) {
+  color: #ffffff !important;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.9) !important;
+}
+
+/* Forzamos el amarillo de tu tag */
+.hero-image-bg span {
+  color: var(--caterpillar) !important;
+}
+
+/* Esto vuelve el div bloqueador totalmente invisible para el mouse */
+.cutaway-left-controls {
+  pointer-events: none !important;
+}
+
+/* Esto asegura que, por si acaso, tus botones estén encima de TODO */
+.material-button-container {
+  position: relative !important;
+  z-index: 9999999 !important;
+  pointer-events: auto !important;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle, rgba(255,255,255,0.12) 0%, transparent 90%);
+  pointer-events: none;
+  z-index: 1; /* Asegurate que esté por encima del video pero debajo de tus textos */
+}

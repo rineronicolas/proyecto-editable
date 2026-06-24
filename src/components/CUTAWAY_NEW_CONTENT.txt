@@ -1,0 +1,364 @@
+function CutawayReveal({ scrollProgress, activePartId, setActivePartId }) {
+  const productOpacity = smoothstep(0.88, 0.96, scrollProgress)
+  const maskInset = '0 0 0 0'
+  const activePart = cutawayParts.find(part => part.id === activePartId) || cutawayParts[0]
+  const controlsOpacity = smoothstep(0.92, 1.0, scrollProgress)
+  const showFullDetailImage = activePart.detailMode === 'contain' || activePart.id === 'blade-assembly'
+
+  const rootRef = useRef(null)
+  const controlButtonRefs = useRef({})
+  const hotspotRefs = useRef({})
+  const [lineTargets, setLineTargets] = useState({})
+
+  useEffect(() => {
+    const updateLines = () => {
+      if (!rootRef.current) return
+      const rootRect = rootRef.current.getBoundingClientRect()
+      const nextTargets = {}
+
+      cutawayParts.forEach(part => {
+        const controlBtn = controlButtonRefs.current[part.id]
+        const hotspotBtn = hotspotRefs.current[part.id]
+        if (!controlBtn || !hotspotBtn) return
+
+        const controlRect = controlBtn.getBoundingClientRect()
+        const hotspotRect = hotspotBtn.getBoundingClientRect()
+
+        const controlRightX = controlRect.right - rootRect.left
+        const controlMiddleY = controlRect.top + controlRect.height / 2 - rootRect.top
+        const hotspotCenterX = hotspotRect.left + hotspotRect.width / 2 - rootRect.left
+        const hotspotCenterY = hotspotRect.top + hotspotRect.height / 2 - rootRect.top
+
+        const dx = hotspotCenterX - controlRightX
+        const dy = hotspotCenterY - controlMiddleY
+        const distance = Math.hypot(dx, dy)
+        const angle = Math.atan2(dy, dx) * (180 / Math.PI)
+
+        nextTargets[part.id] = {
+          left: controlRightX,
+          top: controlMiddleY,
+          width: distance,
+          angle,
+        }
+      })
+
+      setLineTargets(nextTargets)
+    }
+
+    updateLines()
+    window.addEventListener('resize', updateLines)
+
+    return () => window.removeEventListener('resize', updateLines)
+  }, [controlsOpacity, scrollProgress, activePartId])
+
+  return (
+    <div
+      ref={rootRef}
+      style={{
+        position: 'fixed',
+        inset: 0,
+        zIndex: 30,
+        // only let the inner controls and hotspots capture events
+        pointerEvents: 'none',
+        opacity: productOpacity,
+        transition: 'none',
+      }}
+    >
+      <div
+        className="cutaway-left-controls"
+        style={{
+          position: 'absolute',
+          top: 0,
+          right: 'auto',
+          left: 'clamp(1rem, 3vw, 2.8rem)',
+          bottom: 0,
+          width: 'min(16rem, 240px)',
+          background: 'transparent',
+          pointerEvents: 'auto',
+          zIndex: 35,
+        }}>
+        {cutawayParts.map((part, index) => {
+          const selected = activePartId === part.id
+          const borderColor = selected ? `rgba(255,205,0,${0.35 * controlsOpacity})` : `rgba(240,237,232,${0.12 * controlsOpacity})`
+          const bgColor = selected ? `rgba(255,205,0,${0.12 * controlsOpacity})` : `rgba(255,255,255,${0.02 * controlsOpacity})`
+          const textColor = selected ? `rgba(255,205,0,${0.95 * controlsOpacity})` : `rgba(240,237,232,${0.9 * controlsOpacity})`
+          const dotBg = selected ? `rgba(255,205,0,${0.95 * controlsOpacity})` : `rgba(240,237,232,${0.3 * controlsOpacity})`
+          const dotShadow = selected ? `0 0 0 ${8 * controlsOpacity}px rgba(255,205,0,${0.12 * controlsOpacity})` : 'none'
+          const rowTop = ['14%', '37%', '61%', '86%'][index]
+          const line = lineTargets[part.id] || {}
+
+          return (
+            <div key={part.id} style={{ position: 'absolute', left: 0, top: rowTop, transform: 'translateY(-50%)', width: '100%' }}>
+              <button
+                ref={el => { if (el) controlButtonRefs.current[part.id] = el }}
+                type="button"
+                onClick={() => setActivePartId(part.id)}
+                className="cutaway-left-control"
+                style={{
+                  width: '100%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'flex-start',
+                  gap: '0.75rem',
+                  padding: '0.85rem 1rem',
+                  borderRadius: '999px',
+                  border: `1px solid ${borderColor}`,
+                  background: bgColor,
+                  color: textColor,
+                  fontSize: '0.82rem',
+                  fontWeight: 700,
+                  letterSpacing: '0.08em',
+                  textTransform: 'uppercase',
+                    pointerEvents: controlsOpacity > 0.7 ? 'auto' : 'none',
+                    cursor: controlsOpacity > 0.7 ? 'pointer' : 'default',
+                    opacity: controlsOpacity,
+                  overflow: 'visible',
+                }}
+              >
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.6rem' }}>
+                  <span style={{
+                    width: '0.72rem',
+                    height: '0.72rem',
+                    borderRadius: '999px',
+                    background: dotBg,
+                    boxShadow: dotShadow,
+                  }} />
+                  {part.label}
+                </span>
+              </button>
+            </div>
+          )
+        })}
+      </div>
+
+      <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 40 }}>
+        {cutawayParts.map(part => {
+          const selected = activePartId === part.id
+          const line = lineTargets[part.id] || {}
+          return (
+            <span
+              key={`line-${part.id}`}
+              className="cutaway-left-control-line"
+              style={{
+                position: 'absolute',
+                left: line.left ?? 0,
+                top: line.top ?? 0,
+                width: line.width ?? 0,
+                height: '1px',
+                background: selected ? `rgba(255,205,0,${0.95 * controlsOpacity})` : `rgba(255,205,0,${0.18 * controlsOpacity})`,
+                transform: `translateY(-50%) rotate(${line.angle ?? 0}deg)`,
+                transformOrigin: 'left center',
+                borderRadius: '999px',
+                pointerEvents: 'none',
+                opacity: controlsOpacity * (line.width ? 1 : 0),
+                transition: 'opacity 0.2s, width 0.2s, transform 0.2s',
+              }}
+            />
+          )
+        })}
+      </div>
+
+      <div style={{
+        position: 'absolute',
+        left: '50%',
+        top: '50%',
+        width: 'clamp(240px, 32vw, 320px)',
+        maxWidth: '85vw',
+        transform: 'translate(-50%, -50%)',
+        clipPath: `inset(${maskInset})`,
+        WebkitClipPath: `inset(${maskInset})`,
+        // remove yellow glow; keep layout but no colored drop-shadow
+        filter: 'none',
+      }}>
+        <img
+          src="/corte-final-batidora.png"
+          alt="Corte interno de la batidora manual CAT"
+          style={{
+            display: 'block',
+            width: '100%',
+            height: 'auto',
+            opacity: 0.98,
+          }}
+        />
+
+        {cutawayParts.map(part => {
+          const selected = activePartId === part.id
+          return (
+            <button
+              ref={el => { if (el) hotspotRefs.current[part.id] = el }}
+              key={part.id}
+              type="button"
+              aria-label={`Enfocar ${part.label}`}
+              onClick={() => setActivePartId(part.id)}
+              style={{
+                position: 'absolute',
+                left: part.hotspot.left,
+                top: part.hotspot.top,
+                width: '1.85rem',
+                height: '1.85rem',
+                borderRadius: '999px',
+                border: selected ? '1px solid var(--accent)' : '1px solid rgba(240,237,232,0.45)',
+                background: selected ? 'rgba(255,205,0,0.2)' : 'rgba(6,6,9,0.6)',
+                boxShadow: selected
+                  ? '0 0 0 10px rgba(255,205,0,0.08), 0 0 28px rgba(255,205,0,0.34)'
+                  : '0 0 18px rgba(0,0,0,0.35)',
+                  cursor: controlsOpacity > 0.7 ? 'pointer' : 'default',
+                  opacity: controlsOpacity,
+                  pointerEvents: controlsOpacity > 0.7 ? 'auto' : 'none',
+                transform: 'translate(-50%, -50%)',
+                transition: 'width 0.2s, height 0.2s, border 0.2s, background 0.2s, box-shadow 0.2s, opacity 0.2s',
+              }}
+            >
+              <span style={{
+                position: 'absolute',
+                inset: '50% auto auto 50%',
+                width: '0.42rem',
+                height: '0.42rem',
+                borderRadius: '999px',
+                background: 'var(--accent)',
+                transform: 'translate(-50%, -50%)',
+              }} />
+            </button>
+          )
+        })}
+      </div>
+
+      <div
+        className="cutaway-panel"
+        style={{
+        position: 'absolute',
+        right: 'clamp(1rem, 6vw, 5rem)',
+        top: '50%',
+        width: 'min(28vw, 280px)',
+        minWidth: '220px',
+        transform: `translateY(-50%) translateX(${(1 - controlsOpacity) * 20}px)`,
+        opacity: controlsOpacity,
+        pointerEvents: controlsOpacity > 0.6 ? 'auto' : 'none',
+        transition: 'opacity 0.2s, transform 0.2s',
+      }}>
+        <div style={{
+          borderLeft: '1px solid rgba(255,205,0,0.35)',
+          paddingLeft: '1.1rem',
+          marginBottom: '1rem',
+        }}>
+          <span style={{
+            display: 'block',
+            color: 'var(--caterpillar)',
+            fontSize: '0.62rem',
+            letterSpacing: '0.28em',
+            marginBottom: '0.45rem',
+          }}>
+            COMPONENTE
+          </span>
+          <h3 style={{
+            margin: 0,
+            color: 'var(--text)',
+          }}>
+            {activePart.label}
+          </h3>
+          <strong style={{
+            display: 'block',
+            color: 'rgba(240,237,232,0.72)',
+            fontSize: '0.68rem',
+            fontWeight: 500,
+            letterSpacing: '0.13em',
+            marginTop: '0.55rem',
+            textTransform: 'uppercase',
+          }}>
+            {activePart.kicker}
+          </strong>
+          <p style={{
+            color: '#aaa',
+            fontSize: '0.78rem',
+            lineHeight: 1.6,
+            marginTop: '0.75rem',
+          }}>
+            {activePart.desc}
+          </p>
+        </div>
+
+        <div style={{
+          minHeight: '190px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          // remove visible card border and background so only silhouette shows
+          border: 'none',
+          borderRadius: '0px',
+          background: 'transparent',
+          boxShadow: 'none',
+          padding: '0',
+          overflow: 'visible',
+        }}>
+          {showFullDetailImage ? (
+            <img
+              src={activePart.image}
+              alt={`Despiece de ${activePart.label}`}
+              style={{
+                display: 'block',
+                maxWidth: '100%',
+                maxHeight: '230px',
+                objectFit: 'contain',
+                filter: 'none',
+              }}
+            />
+          ) : (
+            <div style={{
+              width: '100%',
+              height: '210px',
+              overflow: 'hidden',
+              borderRadius: '0px',
+              position: 'relative',
+              background: 'transparent',
+              boxShadow: 'none',
+            }}>
+              <img
+                src={activePart.image}
+                alt={`Detalle de ${activePart.label}`}
+                style={{
+                  position: 'absolute',
+                  left: activePart.crop.x,
+                  top: activePart.crop.y,
+                  width: `${activePart.crop.scale * 100}%`,
+                  height: 'auto',
+                  transform: 'translate(-50%, -50%)',
+                  filter: 'none',
+                }}
+              />
+            </div>
+          )}
+        </div>
+
+        <div className="cutaway-panel-buttons" style={{ display: 'flex', justifyContent: 'center', gap: '0.6rem', marginTop: '1rem' }}>
+          {activePart.id === 'body-shell' && (
+            <button
+              type="button"
+              onClick={() => {
+                const target = document.getElementById('seccion-specs')
+                if (target) target.scrollIntoView({ behavior: 'smooth' })
+              }}
+              style={{
+                padding: '0.85rem 1.6rem',
+                borderRadius: '999px',
+                border: '1px solid rgba(255,205,0,0.3)',
+                background: 'rgba(255,205,0,0.08)',
+                color: 'var(--caterpillar)',
+                fontSize: '0.85rem',
+                fontWeight: 700,
+                letterSpacing: '0.12em',
+                textTransform: 'uppercase',
+                cursor: 'pointer',
+                opacity: controlsOpacity,
+                pointerEvents: controlsOpacity > 0.6 ? 'auto' : 'none',
+              }}
+            >
+              VER TAPA
+            </button>
+          )}
+        </div>
+
+      </div>
+
+    </div>
+  )
+}
